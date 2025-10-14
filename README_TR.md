@@ -21,6 +21,9 @@ Gelismis ozellestime destegi, gradyan renkler ve modern Minecraft advancement AP
 </p>
 <p align="center">
   <img src="screenshots/emoji-gradient.png" alt="Emoji ile Gradyan" width="45%">
+  <img src="screenshots/goal-reached.png" alt="Hedef Ulaşıldı Başarısı" width="45%">
+</p>
+<p align="center">
   <img src="screenshots/challenge-frame.png" alt="Challenge Cerceve Tipi" width="45%">
 </p>
 
@@ -28,6 +31,7 @@ Gelismis ozellestime destegi, gradyan renkler ve modern Minecraft advancement AP
 - **Gradyan Efekti**: Kırmızıdan maviye güzel renk geçişleri
 - **Karışık Formatlama**: Kalın yazı ile gradyan renkler ve özel formatlama
 - **Emoji Entegrasyonu**: Emoji ikonları gradyan metin efektleri ile birleştirilmiş
+- **Hedef Ulaşıldı**: Başarılar için standart sarı kenarlıklı goal cercevesi
 - **Challenge Cercevesi**: Özel duyurular için mor kenarlıklı challenge cercevesi
 
 ---

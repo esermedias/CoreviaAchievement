@@ -21,6 +21,9 @@ Advanced achievement notification system for Minecraft servers with full customi
 </p>
 <p align="center">
   <img src="screenshots/emoji-gradient.png" alt="Emoji with Gradient" width="45%">
+  <img src="screenshots/goal-reached.png" alt="Goal Reached Achievement" width="45%">
+</p>
+<p align="center">
   <img src="screenshots/challenge-frame.png" alt="Challenge Frame Type" width="45%">
 </p>
 
@@ -28,6 +31,7 @@ Advanced achievement notification system for Minecraft servers with full customi
 - **Gradient Effect**: Beautiful color transitions from red to blue
 - **Mixed Formatting**: Bold text with gradient colors and special formatting
 - **Emoji Integration**: Emoji icons combined with gradient text effects
+- **Goal Reached**: Standard yellow-bordered goal frame for achievements
 - **Challenge Frame**: Purple-bordered challenge frame for special announcements
 
 ---
