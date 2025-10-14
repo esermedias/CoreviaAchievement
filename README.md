@@ -2,7 +2,33 @@
 
 **[Turkce](README_TR.md)** | English
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Java](https://img.shields.io/badge/Java-17+-orange.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.16--1.21-green.svg)
+![Spigot](https://img.shields.io/badge/Spigot-1.16+-red.svg)
+![Paper](https://img.shields.io/badge/Paper-1.16+-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)
+
 Advanced achievement notification system for Minecraft servers with full customization support, gradient colors, and modern Minecraft advancement API integration.
+
+---
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src="screenshots/gradient-example.png" alt="Gradient Color Effect" width="45%">
+  <img src="screenshots/mixed-format.png" alt="Mixed Formatting" width="45%">
+</p>
+<p align="center">
+  <img src="screenshots/emoji-gradient.png" alt="Emoji with Gradient" width="45%">
+  <img src="screenshots/challenge-frame.png" alt="Challenge Frame Type" width="45%">
+</p>
+
+### Screenshot Descriptions:
+- **Gradient Effect**: Beautiful color transitions from red to blue
+- **Mixed Formatting**: Bold text with gradient colors and special formatting
+- **Emoji Integration**: Emoji icons combined with gradient text effects
+- **Challenge Frame**: Purple-bordered challenge frame for special announcements
 
 ---
 

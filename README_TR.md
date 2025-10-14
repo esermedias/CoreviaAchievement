@@ -2,7 +2,33 @@
 
 Turkce | **[English](README.md)**
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Java](https://img.shields.io/badge/Java-17+-orange.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.16--1.21-green.svg)
+![Spigot](https://img.shields.io/badge/Spigot-1.16+-red.svg)
+![Paper](https://img.shields.io/badge/Paper-1.16+-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)
+
 Gelismis ozellestime destegi, gradyan renkler ve modern Minecraft advancement API entegrasyonu ile Minecraft sunuculari icin gelismis basari bildirimi sistemi.
+
+---
+
+## 📸 Ekran Görüntüleri
+
+<p align="center">
+  <img src="screenshots/gradient-example.png" alt="Gradyan Renk Efekti" width="45%">
+  <img src="screenshots/mixed-format.png" alt="Karışık Formatlama" width="45%">
+</p>
+<p align="center">
+  <img src="screenshots/emoji-gradient.png" alt="Emoji ile Gradyan" width="45%">
+  <img src="screenshots/challenge-frame.png" alt="Challenge Cerceve Tipi" width="45%">
+</p>
+
+### Ekran Görüntüsü Açıklamaları:
+- **Gradyan Efekti**: Kırmızıdan maviye güzel renk geçişleri
+- **Karışık Formatlama**: Kalın yazı ile gradyan renkler ve özel formatlama
+- **Emoji Entegrasyonu**: Emoji ikonları gradyan metin efektleri ile birleştirilmiş
+- **Challenge Cercevesi**: Özel duyurular için mor kenarlıklı challenge cercevesi
 
 ---
 
