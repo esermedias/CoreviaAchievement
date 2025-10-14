@@ -1,0 +1,29 @@
+name: CoreviaAchievement
+version: '${version}'
+main: dev.husecik.achievement.CoreviaAchievement
+api-version: '1.16'
+author: husecik
+description: Advanced achievement notification system
+website: https://coreviabilisim.net/
+
+commands:
+  achievement:
+    description: Send achievement notifications to all players
+    usage: /<command> <send|reload> [message]
+    permission: achievement.use
+    aliases: [ach, adv]
+
+permissions:
+  achievement.*:
+    description: Gives access to all achievement commands
+    default: op
+    children:
+      achievement.send: true
+      achievement.reload: true
+  achievement.send:
+    description: Allows sending achievement messages
+    default: op
+  achievement.reload:
+    description: Allows reloading the configuration
+    default: op
+

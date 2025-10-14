@@ -1,0 +1,174 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                        CoreviaAchievement Plugin                             ║
+# ║                     Advanced Achievement System v1.0.0                       ║
+# ║                                                                              ║
+# ║  Developer: husecik                                                          ║
+# ║  Website: https://coreviabilisim.net                                        ║
+# ║  Minecraft Version Support: 1.16.x - 1.21.9                                 ║
+# ║                                                                              ║
+# ║  Description: Professional achievement notification system with full        ║
+# ║  color support (legacy, hex, gradients), custom icons, sounds, and more.    ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                           GENERAL SETTINGS                                  │
+# └─────────────────────────────────────────────────────────────────────────────┘
+settings:
+  # Enable or disable the plugin
+  # true = Plugin enabled, false = Plugin disabled
+  enabled: true
+  
+  # Debug mode (for troubleshooting)
+  # true = Shows detailed logs in console, false = Only important messages
+  # Enable this if you're experiencing issues and check console logs
+  debug: false
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                        ACHIEVEMENT APPEARANCE                               │
+# └─────────────────────────────────────────────────────────────────────────────┘
+achievement:
+  icon:
+    # Item to display in the achievement notification
+    # All Minecraft material names can be used
+    # Examples: DIAMOND, GOLD_INGOT, EMERALD, NETHER_STAR, ENCHANTED_BOOK, etc.
+    material: "DIAMOND"
+    
+    # Custom model data (if using resource pack)
+    # Leave at 0 for normal usage
+    custom-model-data: 0
+  
+  frame:
+    # Achievement frame type
+    # Options: GOAL (normal yellow), TASK (plain white), CHALLENGE (fancy purple)
+    # GOAL = Standard achievement appearance
+    # TASK = Simple task appearance
+    # CHALLENGE = Special challenge appearance (fancy borders)
+    type: "GOAL"
+  
+  title:
+    # Custom prefix and suffix for messages (Optional)
+    # Leave empty to show only the sent message
+    # Example: prefix: "&6[Announcement] " → "[Announcement] Your message"
+    prefix: ""
+    suffix: ""
+    
+    # Color support (Unused, always enabled)
+    color: true
+  
+  animation:
+    # Achievement animation
+    # enabled: true = Notification disappears after specified duration
+    # enabled: false = Notification disappears after 1 second
+    enabled: true
+    
+    # Duration the notification stays on screen (in seconds)
+    # Minimum: 1, Maximum: 10, Recommended: 5
+    duration: 5
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                           PLUGIN MESSAGES                                   │
+# │  You can use & color codes in all messages                                 │
+# │  Color Codes: &0-&9, &a-&f, &l (bold), &o (italic), &n (underline)        │
+# └─────────────────────────────────────────────────────────────────────────────┘
+messages:
+  # Shown when config is successfully reloaded
+  reload-success: "&a Configuration reloaded successfully!"
+  
+  # Shown when config fails to reload
+  reload-error: "&c Failed to reload configuration!"
+  
+  # Shown when player doesn't have permission to use command
+  no-permission: "&c You don't have permission to use this command!"
+  
+  # Shown when command is used incorrectly
+  invalid-usage: "&e Usage: &f/achievement <send|reload> [message]"
+  
+  # Shown to command sender when achievement message is sent
+  message-sent: "&a Achievement message sent to all players!"
+  
+  # Shown when message is left empty
+  empty-message: "&c Message cannot be empty!"
+  
+  # Shown when command is used while plugin is disabled
+  plugin-disabled: "&c Achievement system is currently disabled!"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                          ADVANCED SETTINGS                                  │
+# │  Advanced settings - Don't change if you don't know what you're doing!     │
+# └─────────────────────────────────────────────────────────────────────────────┘
+advanced:
+  sound:
+    # Play sound effect when achievement appears
+    enabled: true
+    
+    # Sound type (Minecraft sound names)
+    # Default: UI_TOAST_CHALLENGE_COMPLETE (achievement sound)
+    # Other examples: ENTITY_PLAYER_LEVELUP, BLOCK_NOTE_BLOCK_PLING, UI_TOAST_IN
+    type: "UI_TOAST_CHALLENGE_COMPLETE"
+    
+    # Sound volume (0.0 - 2.0)
+    # 1.0 = Normal volume, 0.5 = Half volume, 2.0 = Very loud
+    volume: 1.0
+    
+    # Sound pitch (0.5 - 2.0)
+    # 1.0 = Normal pitch, 0.5 = Low pitch, 2.0 = High pitch
+    pitch: 1.0
+  
+  format:
+    # Strip color codes (make message plain text)
+    # true = All colors removed, false = Colors preserved
+    # NOTE: If this is true, color settings below won't work!
+    strip-colors: false
+    
+    # Legacy color codes support (&c, &a, &l, etc.)
+    # true = & color codes work, false = & is not processed
+    allow-legacy-colors: true
+    
+    # Hex color codes support (#FF5733, #00FFFF, etc.)
+    # true = #RRGGBB format works, false = Hex colors ignored
+    # Hex colors work in 1.16+ versions
+    allow-hex-colors: true
+  
+  compatibility:
+    # Use legacy title system (for older versions)
+    # false = Uses modern advancement API (Recommended)
+    # true = Uses old title system (Try if you have issues)
+    use-legacy-title: false
+    
+    # Packet sending method
+    # AUTO = Automatic detection (Recommended)
+    # REFLECTION = Use reflection
+    # DIRECT = Use direct API
+    packet-method: "AUTO"
+
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                           USAGE EXAMPLES                                    │
+# └─────────────────────────────────────────────────────────────────────────────┘
+# 
+# BASIC USAGE:
+#   /achievement send Hello World
+#
+# COLOR CODES:
+#   /achievement send &cRed &aGreen &9Blue
+#   /achievement send &l&6Bold Golden Text
+#
+# HEX COLORS:
+#   /achievement send #FF5733Orange #00FFFFCyan
+#   /achievement send #FFD700Golden colored message
+#
+# GRADIENT (Color Transition):
+#   /achievement send <g:#FF0000:#0000FF>Red to Blue</g>
+#   /achievement send <gradient:#FFD700:#FF1493>Gold to Pink</gradient>
+#
+# MIXED USAGE:
+#   /achievement send &l<g:#FF6B6B:#4ECDC4>★ SPECIAL ANNOUNCEMENT ★</g>
+#   /achievement send <g:#00FF00:#FFFF00>Player123</g> &rjoined the server!
+#
+# RELOAD COMMAND:
+#   /achievement reload (Reloads the configuration)
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# Support and questions: https://coreviabilisim.net
+# Plugin developer: husecik
+# ─────────────────────────────────────────────────────────────────────────────
+
