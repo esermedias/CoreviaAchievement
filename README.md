@@ -9,7 +9,6 @@
 ![Paper](https://img.shields.io/badge/Paper-1.16+-blue.svg)
 ![Folia](https://img.shields.io/badge/Folia-supported-238636.svg)
 ![Version](https://img.shields.io/badge/version-1.1.0-brightgreen.svg)
-[![Build](https://github.com/esermedias/CoreviaAchievement/actions/workflows/build.yml/badge.svg)](https://github.com/esermedias/CoreviaAchievement/actions/workflows/build.yml)
 
 Advanced achievement notification system for Minecraft servers with full customization support, gradient colors, and modern Minecraft advancement API integration.
 
