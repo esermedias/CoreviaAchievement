@@ -7,7 +7,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 public class ConfigManager {
 
     private final CoreviaAchievement plugin;
-    private FileConfiguration config;
+    private volatile FileConfiguration config;
 
     public ConfigManager(CoreviaAchievement plugin) {
         this.plugin = plugin;

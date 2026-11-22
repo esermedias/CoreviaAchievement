@@ -2,6 +2,7 @@ package dev.husecik.achievement.util;
 
 import dev.husecik.achievement.CoreviaAchievement;
 import dev.husecik.achievement.config.ConfigManager;
+import dev.husecik.achievement.scheduler.TaskScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -9,30 +10,26 @@ import org.bukkit.Sound;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AchievementSender {
 
+    private static final Pattern GRADIENT = Pattern.compile(
+            "<(g|gradient):(#[0-9A-Fa-f]{6}(?::#[0-9A-Fa-f]{6})+)>([^<]*)</\\1>", Pattern.DOTALL);
+
     private final CoreviaAchievement plugin;
-    private final String nmsVersion;
+    private final TaskScheduler scheduler;
     private final int serverVersion;
     private final boolean useNewIconFormat;
 
     public AchievementSender(CoreviaAchievement plugin) {
         this.plugin = plugin;
-        this.nmsVersion = getNMSVersion();
+        this.scheduler = TaskScheduler.create(plugin);
         this.serverVersion = getNumericVersion();
         this.useNewIconFormat = shouldUseNewIconFormat();
-    }
-
-    private String getNMSVersion() {
-        String packageName = Bukkit.getServer().getClass().getPackage().getName();
-        return packageName.substring(packageName.lastIndexOf('.') + 1);
     }
 
     private int getNumericVersion() {
@@ -64,9 +61,10 @@ public class AchievementSender {
         return false;
     }
 
+    /** Shows the notification to every online player. Safe to call from any thread. */
     public void sendToAll(String message) {
         ConfigManager config = plugin.getConfigManager();
-        
+
         if (!config.isEnabled()) {
             return;
         }
@@ -74,8 +72,19 @@ public class AchievementSender {
         String formattedMessage = applyPrefixSuffix(message, config);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            sendToPlayer(player, formattedMessage);
+            deliver(player, formattedMessage);
         }
+    }
+
+    /** Shows the notification to a single player. Safe to call from any thread. */
+    public void sendAchievement(Player player, String message) {
+        ConfigManager config = plugin.getConfigManager();
+
+        if (!config.isEnabled()) {
+            return;
+        }
+
+        deliver(player, applyPrefixSuffix(message, config));
     }
 
     private String applyPrefixSuffix(String message, ConfigManager config) {
@@ -95,95 +104,100 @@ public class AchievementSender {
         return formatted;
     }
 
-    private void sendToPlayer(Player player, String message) {
+    /*
+     * A toast is shown by loading a throwaway advancement, granting it, then revoking and
+     * unloading it once the toast has been on screen long enough.
+     *
+     * The advancement registry is server-wide, so loading and unloading always happens on the
+     * global thread. Granting, revoking and the sound belong to the player and run on whatever
+     * thread owns them. On Spigot/Paper both of these are just the main thread.
+     */
+    private void deliver(Player player, String message) {
         ConfigManager config = plugin.getConfigManager();
+        NamespacedKey key = new NamespacedKey(plugin, "temp_achievement_" + UUID.randomUUID().toString().substring(0, 8));
 
+        String json;
         try {
-            NamespacedKey key = new NamespacedKey(plugin, "temp_achievement_" + UUID.randomUUID().toString().substring(0, 8));
-            
-            createAndGrantAdvancement(player, key, message);
-            
+            json = buildAdvancementJson(message, config.getIconMaterial(), config.getFrameType());
+        } catch (Exception e) {
+            debug("Could not build advancement for " + player.getName(), e);
+            return;
+        }
+
+        long displayTicks = config.isAnimationEnabled()
+                ? Math.max(1, config.getAnimationDuration()) * 20L
+                : 20L;
+        Runnable unload = () -> scheduler.runGlobal(() -> unloadAdvancement(key));
+
+        scheduler.runGlobal(() -> {
+            Advancement advancement;
+            try {
+                if (config.isDebug()) {
+                    plugin.getLogger().info("Loading advancement with JSON: " + json);
+                }
+                advancement = Bukkit.getUnsafe().loadAdvancement(key, json);
+            } catch (Exception e) {
+                debug("Could not load advancement for " + player.getName(), e);
+                return;
+            }
+
+            if (advancement == null) {
+                debug("Advancement is null after loading for " + player.getName(), null);
+                return;
+            }
+
+            // Grant one tick later so the client already knows about the new advancement.
+            scheduler.runForPlayer(player, () -> grant(player, advancement), unload, 1L);
+            scheduler.runForPlayer(player, () -> {
+                revoke(player, advancement);
+                unload.run();
+            }, unload, displayTicks);
+        });
+    }
+
+    private void grant(Player player, Advancement advancement) {
+        ConfigManager config = plugin.getConfigManager();
+        try {
+            AdvancementProgress progress = player.getAdvancementProgress(advancement);
+            for (String criteria : progress.getRemainingCriteria()) {
+                progress.awardCriteria(criteria);
+            }
             if (config.isSoundEnabled()) {
                 playSound(player);
             }
-
-            if (config.isAnimationEnabled()) {
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    removeAdvancement(player, key);
-                }, config.getAnimationDuration() * 20L);
-            } else {
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    removeAdvancement(player, key);
-                }, 20L);
-            }
         } catch (Exception e) {
-            if (config.isDebug()) {
-                plugin.getLogger().warning("Failed to send achievement to " + player.getName() + ": " + e.getMessage());
-                e.printStackTrace();
-            }
+            debug("Error granting advancement to " + player.getName(), e);
         }
     }
 
-    private void createAndGrantAdvancement(Player player, NamespacedKey key, String message) {
+    private void revoke(Player player, Advancement advancement) {
         try {
-            ConfigManager config = plugin.getConfigManager();
-            Material iconMaterial = config.getIconMaterial();
-            String frameType = config.getFrameType();
-
-            String json = buildAdvancementJson(message, iconMaterial, frameType);
-            
-            if (config.isDebug()) {
-                plugin.getLogger().info("Loading advancement with JSON: " + json);
+            AdvancementProgress progress = player.getAdvancementProgress(advancement);
+            for (String criteria : progress.getAwardedCriteria()) {
+                progress.revokeCriteria(criteria);
             }
-            
-            Bukkit.getUnsafe().loadAdvancement(key, json);
-            
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                try {
-                    Advancement advancement = Bukkit.getAdvancement(key);
-                    if (advancement != null) {
-                        AdvancementProgress progress = player.getAdvancementProgress(advancement);
-                        Collection<String> remaining = progress.getRemainingCriteria();
-                        
-                        if (config.isDebug()) {
-                            plugin.getLogger().info("Advancement loaded for " + player.getName() + ", remaining criteria: " + remaining.size());
-                        }
-                        
-                        for (String criteria : remaining) {
-                            progress.awardCriteria(criteria);
-                        }
-                    } else {
-                        if (config.isDebug()) {
-                            plugin.getLogger().warning("Advancement is null after loading for " + player.getName());
-                        }
-                    }
-                } catch (Exception e) {
-                    if (config.isDebug()) {
-                        plugin.getLogger().warning("Error granting advancement: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-            });
         } catch (Exception e) {
-            if (plugin.getConfigManager().isDebug()) {
-                plugin.getLogger().warning("Error creating advancement: " + e.getMessage());
-                e.printStackTrace();
-            }
+            debug("Error revoking advancement from " + player.getName(), e);
         }
     }
 
-    private void removeAdvancement(Player player, NamespacedKey key) {
+    private void unloadAdvancement(NamespacedKey key) {
         try {
-            Advancement advancement = Bukkit.getAdvancement(key);
-            if (advancement != null) {
-                AdvancementProgress progress = player.getAdvancementProgress(advancement);
-                for (String criteria : progress.getAwardedCriteria()) {
-                    progress.revokeCriteria(criteria);
-                }
-            }
-            
             Bukkit.getUnsafe().removeAdvancement(key);
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            debug("Error unloading advancement " + key, e);
+        }
+    }
+
+    private void debug(String message, Exception e) {
+        if (!plugin.getConfigManager().isDebug()) {
+            return;
+        }
+        if (e == null) {
+            plugin.getLogger().warning(message);
+        } else {
+            plugin.getLogger().log(java.util.logging.Level.WARNING, message, e);
+        }
     }
 
     private String buildAdvancementJson(String message, Material material, String frameType) {
@@ -330,62 +344,47 @@ public class AchievementSender {
         return json.toString();
     }
 
+    // Handles <g:#A:#B>text</g> and <gradient:#A:#B:#C>text</gradient>, with two or more stops.
     private String processGradients(String message) {
-        String result = message;
-        
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("<gradient:(#[0-9A-Fa-f]{6}):(#[0-9A-Fa-f]{6})>([^<]*)</gradient>", java.util.regex.Pattern.DOTALL);
-        java.util.regex.Matcher matcher = pattern.matcher(result);
+        Matcher matcher = GRADIENT.matcher(message);
         StringBuffer buffer = new StringBuffer();
-        
+
         while (matcher.find()) {
-            String startColor = matcher.group(1);
-            String endColor = matcher.group(2);
-            String text = matcher.group(3);
-            
-            String gradientText = applyGradient(text, startColor, endColor);
-            matcher.appendReplacement(buffer, java.util.regex.Matcher.quoteReplacement(gradientText));
+            String[] stops = matcher.group(2).split(":");
+            String gradientText = applyGradient(matcher.group(3), stops);
+            matcher.appendReplacement(buffer, Matcher.quoteReplacement(gradientText));
         }
         matcher.appendTail(buffer);
-        result = buffer.toString();
-        
-        pattern = java.util.regex.Pattern.compile("<g:(#[0-9A-Fa-f]{6}):(#[0-9A-Fa-f]{6})>([^<]*)</g>", java.util.regex.Pattern.DOTALL);
-        matcher = pattern.matcher(result);
-        buffer = new StringBuffer();
-        
-        while (matcher.find()) {
-            String startColor = matcher.group(1);
-            String endColor = matcher.group(2);
-            String text = matcher.group(3);
-            
-            String gradientText = applyGradient(text, startColor, endColor);
-            matcher.appendReplacement(buffer, java.util.regex.Matcher.quoteReplacement(gradientText));
-        }
-        matcher.appendTail(buffer);
-        result = buffer.toString();
-        
-        return result;
+
+        return buffer.toString();
     }
 
-    private String applyGradient(String text, String startHex, String endHex) {
+    private String applyGradient(String text, String[] stops) {
         if (text.isEmpty()) return text;
-        
-        int[] startRGB = hexToRgb(startHex);
-        int[] endRGB = hexToRgb(endHex);
-        
+
+        int[][] colors = new int[stops.length][];
+        for (int i = 0; i < stops.length; i++) {
+            colors[i] = hexToRgb(stops[i]);
+        }
+
         StringBuilder result = new StringBuilder();
         int length = text.length();
-        
+        int segments = colors.length - 1;
+
         for (int i = 0; i < length; i++) {
-            double ratio = length > 1 ? (double) i / (length - 1) : 0;
-            
-            int r = (int) (startRGB[0] + (endRGB[0] - startRGB[0]) * ratio);
-            int g = (int) (startRGB[1] + (endRGB[1] - startRGB[1]) * ratio);
-            int b = (int) (startRGB[2] + (endRGB[2] - startRGB[2]) * ratio);
-            
-            String color = String.format("#%02X%02X%02X", r, g, b);
-            result.append(color).append(text.charAt(i));
+            double position = length > 1 ? (double) i / (length - 1) * segments : 0;
+            int segment = Math.min((int) position, segments - 1);
+            double ratio = position - segment;
+
+            int[] from = colors[segment];
+            int[] to = colors[segment + 1];
+            int r = (int) Math.round(from[0] + (to[0] - from[0]) * ratio);
+            int g = (int) Math.round(from[1] + (to[1] - from[1]) * ratio);
+            int b = (int) Math.round(from[2] + (to[2] - from[2]) * ratio);
+
+            result.append(String.format("#%02X%02X%02X", r, g, b)).append(text.charAt(i));
         }
-        
+
         return result.toString();
     }
 

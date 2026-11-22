@@ -2,6 +2,7 @@ name: CoreviaAchievement
 version: '${version}'
 main: dev.husecik.achievement.CoreviaAchievement
 api-version: '1.16'
+folia-supported: true
 author: husecik
 description: Advanced achievement notification system
 website: https://coreviabilisim.net/
