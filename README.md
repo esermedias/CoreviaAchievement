@@ -7,7 +7,9 @@
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.16--1.21-green.svg)
 ![Spigot](https://img.shields.io/badge/Spigot-1.16+-red.svg)
 ![Paper](https://img.shields.io/badge/Paper-1.16+-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)
+![Folia](https://img.shields.io/badge/Folia-supported-238636.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-brightgreen.svg)
+[![Build](https://github.com/esermedias/CoreviaAchievement/actions/workflows/build.yml/badge.svg)](https://github.com/esermedias/CoreviaAchievement/actions/workflows/build.yml)
 
 Advanced achievement notification system for Minecraft servers with full customization support, gradient colors, and modern Minecraft advancement API integration.
 
@@ -94,7 +96,11 @@ Advanced achievement notification system for Minecraft servers with full customi
 - Spigot 1.16+
 - Paper 1.16+
 - Purpur 1.16+
+- Folia (and Folia forks such as CanvasMC)
 - Any Spigot-based fork
+
+### Folia
+The plugin declares `folia-supported: true`. On Folia the temporary advancement is loaded and unloaded on the global region thread, while granting, revoking and the sound run on each player's own entity scheduler. On Spigot and Paper the same code falls back to the regular Bukkit scheduler.
 
 ### Java Version
 - Java 17 or higher (recommended)
@@ -316,22 +322,16 @@ Example: `<g:#FF0000:#00FF00:#0000FF>Rainbow</g>`
 
 ## API for Developers
 
-### Maven Dependency
-```xml
-<dependency>
-    <groupId>dev.husecik</groupId>
-    <artifactId>CoreviaAchievement</artifactId>
-    <version>1.0.0</version>
-    <scope>provided</scope>
-</dependency>
-```
+### Adding it to your project
+The plugin isn't published to a Maven repository yet. Build it (or grab the jar from [Releases](../../releases)) and add it as a compile-only dependency:
 
-### Gradle Dependency
 ```gradle
 dependencies {
-    compileOnly 'dev.husecik:CoreviaAchievement:1.0.0'
+    compileOnly files('libs/CoreviaAchievement-1.1.0.jar')
 }
 ```
+
+Add `depend: [CoreviaAchievement]` or `softdepend` to your own `plugin.yml`.
 
 ### Getting the Plugin Instance
 ```java
@@ -349,7 +349,7 @@ import org.bukkit.entity.Player;
 // Get the achievement sender
 AchievementSender sender = CoreviaAchievement.getInstance().getAchievementSender();
 
-// Send to specific player
+// Send to a specific player (safe to call from any thread, including on Folia)
 Player player = ...; // Get player
 sender.sendAchievement(player, "Your custom message");
 
@@ -393,7 +393,7 @@ sender.sendAchievement(player, "<g:#FFD700:#FF1493>Congratulations!</g>");
 
 ### Prerequisites
 - Java Development Kit (JDK) 17 or higher
-- Gradle 8.x or higher (included via wrapper)
+- Nothing else: the Gradle wrapper (Gradle 9) is included
 
 ### Build Steps
 
@@ -414,7 +414,7 @@ gradlew.bat build
 
 3. The compiled JAR will be located at:
 ```
-build/libs/CoreviaAchievement-1.0.0.jar
+build/libs/CoreviaAchievement-1.1.0.jar
 ```
 
 ### Development Setup
@@ -539,8 +539,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Third-Party Libraries
 
-- **Spigot API** - GPL v3
-- **Gradle Shadow Plugin** - Apache 2.0
+- **Paper API** - GPL v3 (compile-only, not bundled)
 
 ---
 
@@ -571,6 +570,13 @@ Special thanks to:
 ---
 
 ## Changelog
+
+### Version 1.1.0
+- Folia support (`folia-supported: true`), with a scheduler layer that also works on Spigot and Paper
+- New `AchievementSender#sendAchievement(Player, String)` for sending to a single player
+- Gradients now accept more than two color stops
+- Build moved to Gradle 9 and the Paper API, with a working Gradle wrapper
+- GitHub Actions build on every push
 
 ### Version 1.0.0
 - Initial release

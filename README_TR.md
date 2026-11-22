@@ -7,7 +7,8 @@ Turkce | **[English](README.md)**
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.16--1.21-green.svg)
 ![Spigot](https://img.shields.io/badge/Spigot-1.16+-red.svg)
 ![Paper](https://img.shields.io/badge/Paper-1.16+-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)
+![Folia](https://img.shields.io/badge/Folia-destekleniyor-238636.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-brightgreen.svg)
 
 Gelismis ozellestime destegi, gradyan renkler ve modern Minecraft advancement API entegrasyonu ile Minecraft sunuculari icin gelismis basari bildirimi sistemi.
 
@@ -94,6 +95,7 @@ Gelismis ozellestime destegi, gradyan renkler ve modern Minecraft advancement AP
 - Spigot 1.16+
 - Paper 1.16+
 - Purpur 1.16+
+- Folia (ve CanvasMC gibi Folia forklari)
 - Herhangi bir Spigot tabanli fork
 
 ### Java Surumu
@@ -316,22 +318,16 @@ Ornek: `<g:#FF0000:#00FF00:#0000FF>Gokkusagi</g>`
 
 ## Geliştiriciler Icin API
 
-### Maven Bagimliligi
-```xml
-<dependency>
-    <groupId>dev.husecik</groupId>
-    <artifactId>CoreviaAchievement</artifactId>
-    <version>1.0.0</version>
-    <scope>provided</scope>
-</dependency>
-```
+### Projeye ekleme
+Eklenti henuz bir Maven deposunda yayinlanmadi. Derleyin (ya da [Releases](../../releases) sayfasindan jar'i indirin) ve compile-only bagimlilik olarak ekleyin:
 
-### Gradle Bagimliligi
 ```gradle
 dependencies {
-    compileOnly 'dev.husecik:CoreviaAchievement:1.0.0'
+    compileOnly files('libs/CoreviaAchievement-1.1.0.jar')
 }
 ```
+
+Kendi `plugin.yml` dosyaniza `depend: [CoreviaAchievement]` veya `softdepend` ekleyin.
 
 ### Plugin Instance'i Alma
 ```java
@@ -393,7 +389,7 @@ sender.sendAchievement(player, "<g:#FFD700:#FF1493>Tebrikler!</g>");
 
 ### Gereksinimler
 - Java Development Kit (JDK) 17 veya ustu
-- Gradle 8.x veya ustu (wrapper ile dahildir)
+- Baska bir sey gerekmez: Gradle wrapper (Gradle 9) projeye dahildir
 
 ### Derleme Adimlari
 
@@ -414,7 +410,7 @@ gradlew.bat build
 
 3. Derlenmiş JAR dosyasi su konumda olacaktir:
 ```
-build/libs/CoreviaAchievement-1.0.0.jar
+build/libs/CoreviaAchievement-1.1.0.jar
 ```
 
 ### Gelistirme Ortami Kurulumu
@@ -571,6 +567,13 @@ Ozel tesekkuler:
 ---
 
 ## Degisiklik Gunlugu
+
+### Surum 1.1.0
+- Folia destegi (`folia-supported: true`); Spigot ve Paper'da da calisan zamanlayici katmani
+- Tek oyuncuya gondermek icin `AchievementSender#sendAchievement(Player, String)`
+- Gradyanlar artik ikiden fazla renk alabiliyor
+- Gradle 9 ve Paper API'ye gecis, calisan Gradle wrapper
+- Her push'ta GitHub Actions ile derleme
 
 ### Surum 1.0.0
 - Ilk surum
